@@ -11,8 +11,8 @@ namespace StudentManagement.Api.Data
         }
 
         public DbSet<Student> Students { get; set; }
-        public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Classroom> Classrooms { get; set; }
+        public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<TeacherClassroom> TeacherClassrooms { get; set; }
         public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -21,11 +21,15 @@ namespace StudentManagement.Api.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            //student classroom relation
+
             modelBuilder.Entity<Student>()
             .HasOne(s => s.Classroom)
             .WithMany(c => c.Students)
             .HasForeignKey(s => s.ClassroomId)
             .OnDelete(DeleteBehavior.Restrict);
+
+            //teacher classroom relation
 
             modelBuilder.Entity<TeacherClassroom>()
                 .Property(tc => tc.Id)
