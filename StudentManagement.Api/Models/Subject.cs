@@ -12,7 +12,7 @@ namespace StudentManagement.Api.Models
         [Key]
         public int SubjectId { get; set; }
         [Required(ErrorMessage = "Classroom Name is required")]
-        [MaxLength(100)]
+        [MaxLength(100, ErrorMessage = "Subject Name cannot exceed 100 characters.")]
         public string SubjectName { get; set; }
 
         public ICollection<TeacherSubject> TeacherSubjects { get; set; }
