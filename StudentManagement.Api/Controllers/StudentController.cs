@@ -3,7 +3,6 @@ using StudentManagement.Api.Data;
 using StudentManagement.Api.Data.Dtos.RequestDtos;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Api.Models;
-using StudentManagement.Api.Data.Dtos.ResponseDtos;
 
 namespace StudentManagement.Api.Controllers
 {
@@ -21,36 +20,22 @@ namespace StudentManagement.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllStudents()
         {
-            try
-            {
-                var students = await _dataContext.Students.ToListAsync();
-                return Ok(students);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while fetching students.", details = ex.Message });
-            }
+            var students = await _dataContext.Students.ToListAsync();
+            return Ok(students);
         }
 
         // Get a student by ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentById([FromRoute] int id)
         {
-            try
-            {
-                var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
+            var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
 
-                if (student == null)
-                {
-                    return NotFound(new { message = $"Student with ID {id} not found." });
-                }
-
-                return Ok(student);
-            }
-            catch (Exception ex)
+            if (student == null)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching the student.", details = ex.Message });
+                return NotFound(new { message = $"Student with ID {id} not found." });
             }
+
+            return Ok(student);
         }
 
         // Create a new student
@@ -62,29 +47,22 @@ namespace StudentManagement.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            try
+            Student req = new Student
             {
-                Student req = new Student
-                {
-                    FirstName = student.FirstName,
-                    LastName = student.LastName,
-                    ContactPerson = student.ContactPerson,
-                    ContactNo = student.ContactNo,
-                    EmailAddress = student.EmailAddress,
-                    DateOfBirth = student.DateOfBirth,
-                    ClassroomId = student.ClassroomId
-                };
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                ContactPerson = student.ContactPerson,
+                ContactNo = student.ContactNo,
+                EmailAddress = student.EmailAddress,
+                DateOfBirth = student.DateOfBirth,
+                ClassroomId = student.ClassroomId
+            };
 
-                await _dataContext.Students.AddAsync(req);
+            await _dataContext.Students.AddAsync(req);
 
-                await _dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetStudentById), new { id = req.StudentId }, student);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while creating the student.", details = ex.Message });
-            }
+            return CreatedAtAction(nameof(GetStudentById), new { id = req.StudentId }, student);
         }
 
         // Update a student
@@ -96,57 +74,43 @@ namespace StudentManagement.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            try
+            var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
+
+            if (student == null)
             {
-                var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
-
-                if (student == null)
-                {
-                    return NotFound(new { message = $"Student with ID {id} not found." });
-                }
-
-
-                student.FirstName = studentRequest.FirstName;
-                student.LastName = studentRequest.LastName;
-                student.ContactPerson = studentRequest.ContactPerson;
-                student.ContactNo = studentRequest.ContactNo;
-                student.EmailAddress = studentRequest.EmailAddress;
-                student.DateOfBirth = studentRequest.DateOfBirth;
-                student.ClassroomId = studentRequest.ClassroomId;
-
-                await _dataContext.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(GetStudentById), new { id = student.StudentId }, student);
+                return NotFound(new { message = $"Student with ID {id} not found." });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while updating the student.", details = ex.Message });
-            }
+
+
+            student.FirstName = studentRequest.FirstName;
+            student.LastName = studentRequest.LastName;
+            student.ContactPerson = studentRequest.ContactPerson;
+            student.ContactNo = studentRequest.ContactNo;
+            student.EmailAddress = studentRequest.EmailAddress;
+            student.DateOfBirth = studentRequest.DateOfBirth;
+            student.ClassroomId = studentRequest.ClassroomId;
+
+            await _dataContext.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetStudentById), new { id = student.StudentId }, student);
         }
 
         // Delete a student
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
-            try
+            var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
+
+            if (student == null)
             {
-                var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
-
-                if (student == null)
-                {
-                    return NotFound(new { message = $"Student with ID {id} not found." });
-                }
-
-                _dataContext.Students.Remove(student);
-
-                _dataContext.SaveChanges();
-
-                return NoContent();
+                return NotFound(new { message = $"Student with ID {id} not found." });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while deleting the student.", details = ex.Message });
-            }
+
+            _dataContext.Students.Remove(student);
+
+            _dataContext.SaveChanges();
+
+            return NoContent();
         }
     }
 }
