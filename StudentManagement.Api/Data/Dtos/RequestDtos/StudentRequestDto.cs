@@ -29,6 +29,6 @@ namespace StudentManagement.Api.Data.Dtos.RequestDtos
         public DateTime DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "Classroom ID is required.")]
-        public int ClassroomID { get; set; }
+        public int ClassroomId { get; set; }
     }
 }
