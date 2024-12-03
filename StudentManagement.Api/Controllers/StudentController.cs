@@ -7,7 +7,7 @@ using StudentManagement.Api.Models;
 namespace StudentManagement.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/student")]
     public class StudentController : ControllerBase
     {
         private readonly DataContext _dataContext;
@@ -96,8 +96,8 @@ namespace StudentManagement.Api.Controllers
         }
 
         // Delete a student
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteStudent(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteStudent([FromRoute] int id)
         {
             var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
 
