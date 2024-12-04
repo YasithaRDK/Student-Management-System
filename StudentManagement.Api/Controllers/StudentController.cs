@@ -3,6 +3,7 @@ using StudentManagement.Api.Data;
 using StudentManagement.Api.Data.Dtos.RequestDtos;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Api.Models;
+using StudentManagement.Api.Data.Dtos.ResponseDtos;
 
 namespace StudentManagement.Api.Controllers
 {
@@ -28,7 +29,31 @@ namespace StudentManagement.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentById([FromRoute] int id)
         {
-            var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
+            var student = await _dataContext.Students
+            .Where(s => s.StudentId == id)
+            .Select(s => new StudentSingleResponseDto
+            {
+                StudentId = s.StudentId,
+                FirstName = s.FirstName,
+                LastName = s.LastName,
+                ContactPerson = s.ContactPerson,
+                ContactNo = s.ContactNo,
+                EmailAddress = s.EmailAddress,
+                DateOfBirth = s.DateOfBirth,
+                Age = s.Age,
+                ClassroomId = s.ClassroomId,
+                ClassroomName = s.Classroom.ClassroomName,
+                Teachers = s.Classroom.TeacherClassrooms
+                    .Select(tc => new TeacherResponseDto
+                    {
+                        TeacherId = tc.TeacherId,
+                        TeacherName = tc.Teacher.FirstName + " " + tc.Teacher.LastName,
+                        Subjects = tc.Teacher.TeacherSubjects
+                            .Select(ts => ts.Subject.SubjectName)
+                            .ToList()
+                    }).ToList()
+            })
+            .FirstOrDefaultAsync();
 
             if (student == null)
             {
