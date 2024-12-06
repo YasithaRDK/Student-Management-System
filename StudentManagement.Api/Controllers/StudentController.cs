@@ -21,7 +21,19 @@ namespace StudentManagement.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllStudents()
         {
-            var students = await _dataContext.Students.ToListAsync();
+            var students = await _dataContext.Students
+            .Select(s => new StudentResponseDto
+            {
+                StudentId = s.StudentId,
+                FirstName = s.FirstName,
+                LastName = s.LastName,
+                ContactPerson = s.ContactPerson,
+                ContactNo = s.ContactNo,
+                EmailAddress = s.EmailAddress,
+                DateOfBirth = s.DateOfBirth,
+                Age = s.Age,
+                ClassroomName = s.Classroom.ClassroomName
+            }).ToListAsync();
             return Ok(students);
         }
 
@@ -41,12 +53,10 @@ namespace StudentManagement.Api.Controllers
                 EmailAddress = s.EmailAddress,
                 DateOfBirth = s.DateOfBirth,
                 Age = s.Age,
-                ClassroomId = s.ClassroomId,
                 ClassroomName = s.Classroom.ClassroomName,
                 Teachers = s.Classroom.TeacherClassrooms
                     .Select(tc => new TeacherResponseDto
                     {
-                        TeacherId = tc.TeacherId,
                         TeacherName = tc.Teacher.FirstName + " " + tc.Teacher.LastName,
                         Subjects = tc.Teacher.TeacherSubjects
                             .Select(ts => ts.Subject.SubjectName)

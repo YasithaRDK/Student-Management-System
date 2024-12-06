@@ -1,5 +1,3 @@
-using StudentManagement.Api.Models;
-
 namespace StudentManagement.Api.Data.Dtos.ResponseDtos
 {
     public class StudentResponseDto
@@ -14,6 +12,5 @@ namespace StudentManagement.Api.Data.Dtos.ResponseDtos
         public int Age { get; set; }
         public int ClassroomId { get; set; }
         public string ClassroomName { get; set; }
-        public List<Teacher> Teachers { get; set; }
     }
 }
