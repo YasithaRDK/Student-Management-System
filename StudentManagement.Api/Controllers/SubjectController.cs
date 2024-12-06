@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Api.Data;
 using StudentManagement.Api.Data.Dtos.RequestDtos;
+using StudentManagement.Api.Data.Dtos.ResponseDtos;
 using StudentManagement.Api.Models;
 
 namespace StudentManagement.Api.Controllers
@@ -20,7 +21,13 @@ namespace StudentManagement.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllSubject()
         {
-            var subjects = await _dataContext.Subjects.ToListAsync();
+            var subjects = await _dataContext.Subjects
+            .Select(s => new SubjectResponseDto
+            {
+                SubjectId = s.SubjectId,
+                SubjectName = s.SubjectName,
+            })
+            .ToListAsync();
             return Ok(subjects);
         }
 
@@ -28,7 +35,14 @@ namespace StudentManagement.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSubjectById([FromRoute] int id)
         {
-            var subject = await _dataContext.Subjects.FirstOrDefaultAsync(i => i.SubjectId == id);
+            var subject = await _dataContext.Subjects
+            .Where(s => s.SubjectId == id)
+            .Select(s => new SubjectResponseDto
+            {
+                SubjectId = s.SubjectId,
+                SubjectName = s.SubjectName,
+            })
+            .FirstOrDefaultAsync();
 
             if (subject == null)
             {
@@ -56,7 +70,7 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetSubjectById), new { id = req.SubjectId }, subject);
+            return StatusCode(201, new { message = "Subject created successfully" });
         }
 
         // Update a subject
@@ -68,7 +82,7 @@ namespace StudentManagement.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var subject = await _dataContext.Subjects.FirstOrDefaultAsync(i => i.SubjectId == id);
+            var subject = await _dataContext.Subjects.FirstOrDefaultAsync(s => s.SubjectId == id);
 
             if (subject == null)
             {
@@ -80,14 +94,14 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetSubjectById), new { id = subject.SubjectId }, subject);
+            return Ok(new { message = "Subject updated successfully" });
         }
 
         // Delete a subject
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSubject([FromRoute] int id)
         {
-            var subject = await _dataContext.Subjects.FirstOrDefaultAsync(i => i.SubjectId == id);
+            var subject = await _dataContext.Subjects.FirstOrDefaultAsync(s => s.SubjectId == id);
 
             if (subject == null)
             {
