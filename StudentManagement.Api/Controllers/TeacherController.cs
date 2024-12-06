@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Api.Data;
 using StudentManagement.Api.Data.Dtos.RequestDtos;
+using StudentManagement.Api.Data.Dtos.ResponseDtos;
 using StudentManagement.Api.Models;
 
 namespace StudentManagement.Api.Controllers
@@ -20,7 +21,17 @@ namespace StudentManagement.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllTeachers()
         {
-            var teachers = await _dataContext.Teachers.ToListAsync();
+            var teachers = await _dataContext.Teachers
+            .Select(t => new TeacherResponseDto
+            {
+                TeacherId = t.TeacherId,
+                FirstName = t.FirstName,
+                LastName = t.LastName,
+                ContactNo = t.ContactNo,
+                EmailAddress = t.EmailAddress
+
+            })
+            .ToListAsync();
             return Ok(teachers);
         }
 
@@ -28,7 +39,18 @@ namespace StudentManagement.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTeacherById([FromRoute] int id)
         {
-            var teacher = await _dataContext.Teachers.FirstOrDefaultAsync(i => i.TeacherId == id);
+            var teacher = await _dataContext.Teachers
+            .Where(t => t.TeacherId == id)
+            .Select(t => new TeacherResponseDto
+            {
+                TeacherId = t.TeacherId,
+                FirstName = t.FirstName,
+                LastName = t.LastName,
+                ContactNo = t.ContactNo,
+                EmailAddress = t.EmailAddress
+
+            })
+            .FirstOrDefaultAsync();
 
             if (teacher == null)
             {
@@ -59,7 +81,7 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetTeacherById), new { id = req.TeacherId }, teacher);
+            return StatusCode(201, new { message = "Teacher created successfully" });
         }
 
         // Update a teacher
@@ -86,7 +108,7 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetTeacherById), new { id = teacher.TeacherId }, teacher);
+            return Ok(new { message = "Teacher updated successfully" });
         }
 
         // Delete a teacher
