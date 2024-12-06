@@ -10,8 +10,7 @@ namespace StudentManagement.Api.Data.Dtos.ResponseDtos
         public string EmailAddress { get; set; }
         public DateTime DateOfBirth { get; set; }
         public int Age { get; set; }
-        public int ClassroomId { get; set; }
         public string ClassroomName { get; set; }
-        public List<TeacherResponseDto> Teachers { get; set; }
+        public List<TeacherSpecResponseDto> Teachers { get; set; }
     }
 }

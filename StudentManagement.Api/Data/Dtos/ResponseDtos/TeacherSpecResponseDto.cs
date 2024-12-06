@@ -5,12 +5,10 @@ using System.Threading.Tasks;
 
 namespace StudentManagement.Api.Data.Dtos.ResponseDtos
 {
-    public class TeacherResponseDto
+    public class TeacherSpecResponseDto
     {
-        public int TeacherId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string ContactNo { get; set; }
-        public string EmailAddress { get; set; }
+        public List<string> Subjects { get; set; }
     }
 }

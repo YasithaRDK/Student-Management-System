@@ -55,15 +55,13 @@ namespace StudentManagement.Api.Controllers
                 Age = s.Age,
                 ClassroomName = s.Classroom.ClassroomName,
                 Teachers = s.Classroom.TeacherClassrooms
-                    .Select(tc => new TeacherResponseDto
+                    .Select(tc => new TeacherSpecResponseDto
                     {
                         FirstName = tc.Teacher.FirstName,
                         LastName = tc.Teacher.LastName,
                         Subjects = tc.Teacher.TeacherSubjects
-                            .Select(s => new SubjectResponseDto
-                            {
-                                SubjectName = s.Subject.SubjectName
-                            }).ToList()
+                            .Select(s => s.Subject.SubjectName)
+                            .ToList()
                     }).ToList()
             })
             .FirstOrDefaultAsync();
