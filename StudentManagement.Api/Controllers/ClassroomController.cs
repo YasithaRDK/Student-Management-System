@@ -68,14 +68,7 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(
-                nameof(GetClassroomById),
-                new { id = req.ClassroomId },
-                new ClassroomResponseDto
-                {
-                    ClassroomId = req.ClassroomId,
-                    ClassroomName = req.ClassroomName
-                });
+            return StatusCode(201, new { message = "Classroom created successfully" });
         }
 
         // Update a classroom
@@ -87,7 +80,7 @@ namespace StudentManagement.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var classroom = await _dataContext.Classrooms.FirstOrDefaultAsync(i => i.ClassroomId == id);
+            var classroom = await _dataContext.Classrooms.FirstOrDefaultAsync(c => c.ClassroomId == id);
 
             if (classroom == null)
             {
@@ -99,14 +92,7 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(
-                nameof(GetClassroomById),
-                new { id = classroom.ClassroomId },
-                new ClassroomResponseDto
-                {
-                    ClassroomId = classroom.ClassroomId,
-                    ClassroomName = classroom.ClassroomName
-                });
+            return Ok(new { message = "Classroom updated successfully" });
         }
 
         // Delete a classroom

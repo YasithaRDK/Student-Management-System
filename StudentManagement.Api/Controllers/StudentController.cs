@@ -57,10 +57,13 @@ namespace StudentManagement.Api.Controllers
                 Teachers = s.Classroom.TeacherClassrooms
                     .Select(tc => new TeacherResponseDto
                     {
-                        TeacherName = tc.Teacher.FirstName + " " + tc.Teacher.LastName,
+                        FirstName = tc.Teacher.FirstName,
+                        LastName = tc.Teacher.LastName,
                         Subjects = tc.Teacher.TeacherSubjects
-                            .Select(ts => ts.Subject.SubjectName)
-                            .ToList()
+                            .Select(s => new SubjectResponseDto
+                            {
+                                SubjectName = s.Subject.SubjectName
+                            }).ToList()
                     }).ToList()
             })
             .FirstOrDefaultAsync();
@@ -97,7 +100,7 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetStudentById), new { id = req.StudentId }, student);
+            return StatusCode(201, new { message = "Student created successfully" });
         }
 
         // Update a student
@@ -109,7 +112,8 @@ namespace StudentManagement.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
+            var student = await _dataContext.Students
+            .FirstOrDefaultAsync(s => s.StudentId == id);
 
             if (student == null)
             {
@@ -127,14 +131,14 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetStudentById), new { id = student.StudentId }, student);
+            return Ok(new { message = "Student updated successfully" });
         }
 
         // Delete a student
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent([FromRoute] int id)
         {
-            var student = await _dataContext.Students.FirstOrDefaultAsync(i => i.StudentId == id);
+            var student = await _dataContext.Students.FirstOrDefaultAsync(s => s.StudentId == id);
 
             if (student == null)
             {
