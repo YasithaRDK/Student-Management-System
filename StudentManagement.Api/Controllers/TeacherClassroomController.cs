@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Api.Data;
 using StudentManagement.Api.Data.Dtos.RequestDtos;
+using StudentManagement.Api.Data.Dtos.ResponseDtos;
 using StudentManagement.Api.Models;
 
 namespace StudentManagement.Api.Controllers
@@ -20,15 +21,42 @@ namespace StudentManagement.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllAllocateClassroom()
         {
-            var allocateClassrooms = await _dataContext.TeacherClassrooms.ToListAsync();
-            return Ok(allocateClassrooms);
+            var teacherClassrooms = await _dataContext.TeacherClassrooms
+            .GroupBy(tc => new { tc.TeacherId, tc.Teacher.FirstName, tc.Teacher.LastName })
+            .Select(group => new TeacherClassroomResponseDto
+            {
+                TeacherId = group.Key.TeacherId,
+                TeacherName = group.Key.FirstName + " " + group.Key.LastName,
+                Classrooms = group.Select(tc => new ClassroomResponseDto
+                {
+                    ClassroomId = tc.Classroom.ClassroomId,
+                    ClassroomName = tc.Classroom.ClassroomName
+                }).ToList()
+            })
+            .ToListAsync();
+
+            return Ok(teacherClassrooms);
         }
 
+
         // Get a allocateClassroom by ID
-        [HttpGet("{teacherId}/{classroomId}")]
-        public async Task<IActionResult> GetAllocateClassroomById([FromRoute] int teacherId, int classroomId)
+        [HttpGet("{teacherId}")]
+        public async Task<IActionResult> GetAllocateClassroomById([FromRoute] int teacherId)
         {
-            var allocateClassroom = await _dataContext.TeacherClassrooms.FirstOrDefaultAsync(ts => ts.TeacherId == teacherId && ts.ClassroomId == classroomId);
+            var allocateClassroom = await _dataContext.TeacherClassrooms
+            .Where(ts => ts.TeacherId == teacherId)
+            .GroupBy(tc => new { tc.TeacherId, tc.Teacher.FirstName, tc.Teacher.LastName })
+            .Select(group => new TeacherClassroomResponseDto
+            {
+                TeacherId = group.Key.TeacherId,
+                TeacherName = group.Key.FirstName + " " + group.Key.LastName,
+                Classrooms = group.Select(tc => new ClassroomResponseDto
+                {
+                    ClassroomId = tc.Classroom.ClassroomId,
+                    ClassroomName = tc.Classroom.ClassroomName
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
 
             if (allocateClassroom == null)
             {
@@ -57,7 +85,7 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetAllocateClassroomById), new { teacherId = req.TeacherId, classroomId = req.ClassroomId }, teacherClassroom);
+            return StatusCode(201, new { message = "The classroom has been successfully assigned to the teacher" });
         }
 
         // Delete a allocateClassroom
