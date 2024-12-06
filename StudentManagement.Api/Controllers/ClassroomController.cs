@@ -21,7 +21,12 @@ namespace StudentManagement.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllClassrooms()
         {
-            var classrooms = await _dataContext.Classrooms.ToListAsync();
+            var classrooms = await _dataContext.Classrooms
+            .Select(c => new ClassroomResponseDto
+            {
+                ClassroomId = c.ClassroomId,
+                ClassroomName = c.ClassroomName
+            }).ToListAsync();
             return Ok(classrooms);
         }
 
@@ -29,7 +34,13 @@ namespace StudentManagement.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetClassroomById([FromRoute] int id)
         {
-            var classroom = await _dataContext.Classrooms.FirstOrDefaultAsync(i => i.ClassroomId == id);
+            var classroom = await _dataContext.Classrooms
+            .Where(c => c.ClassroomId == id)
+            .Select(c => new ClassroomResponseDto
+            {
+                ClassroomId = c.ClassroomId,
+                ClassroomName = c.ClassroomName
+            }).FirstOrDefaultAsync();
 
             if (classroom == null)
             {
@@ -57,7 +68,14 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetClassroomById), new { id = req.ClassroomId }, classroom);
+            return CreatedAtAction(
+                nameof(GetClassroomById),
+                new { id = req.ClassroomId },
+                new ClassroomResponseDto
+                {
+                    ClassroomId = req.ClassroomId,
+                    ClassroomName = req.ClassroomName
+                });
         }
 
         // Update a classroom
@@ -81,7 +99,14 @@ namespace StudentManagement.Api.Controllers
 
             await _dataContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetClassroomById), new { id = classroom.ClassroomId }, classroom);
+            return CreatedAtAction(
+                nameof(GetClassroomById),
+                new { id = classroom.ClassroomId },
+                new ClassroomResponseDto
+                {
+                    ClassroomId = classroom.ClassroomId,
+                    ClassroomName = classroom.ClassroomName
+                });
         }
 
         // Delete a classroom
